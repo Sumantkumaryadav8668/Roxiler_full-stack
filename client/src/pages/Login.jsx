@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail } from '../utils/validation';
-import { Store, Lock, Mail, ArrowRight } from 'lucide-react';
+import PasswordInput from '../components/PasswordInput';
+import { Store, Mail, ArrowRight } from 'lucide-react';
 
 const Login = () => {
     const { login } = useAuth();
@@ -116,19 +117,13 @@ const Login = () => {
 
                     <div className="form-group">
                         <label className="form-label">Password</label>
-                        <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                type="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                className="form-control"
-                                style={{ paddingLeft: '2.75rem' }}
-                                required
-                            />
-                        </div>
+                        <PasswordInput
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            required
+                        />
                         {fieldErrors?.password && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{fieldErrors.password}</span>}
                     </div>
 

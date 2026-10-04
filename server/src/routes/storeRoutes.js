@@ -1,9 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const { getStores, getStoreById, getOwnerDashboard } = require('../controllers/storeController');
-const { verifyToken } = require('../middleware/authMiddleware');
-const { requireRole } = require('../middleware/roleMiddleware');
+import express from 'express';
+import { getStores, getStoreById, getOwnerDashboard } from '../controllers/storeController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
+import { requireRole } from '../middleware/roleMiddleware.js';
 
+const router = express.Router();
 
 const optionalAuth = (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -17,4 +17,4 @@ router.get('/owner/dashboard', verifyToken, requireRole('STORE_OWNER'), getOwner
 router.get('/', optionalAuth, getStores);
 router.get('/:id', optionalAuth, getStoreById);
 
-module.exports = router;
+export default router;

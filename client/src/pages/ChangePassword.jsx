@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { validatePassword } from '../utils/validation';
+import PasswordInput from '../components/PasswordInput';
 import { Key, Lock, CheckCircle } from 'lucide-react';
 
 const ChangePassword = () => {
@@ -75,53 +76,38 @@ const ChangePassword = () => {
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">Current Password</label>
-                        <div style={{ position: 'relative' }}>
-                            <Key size={18} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                type="password"
-                                name="currentPassword"
-                                value={formData.currentPassword}
-                                onChange={handleChange}
-                                placeholder="Enter current password"
-                                className="form-control"
-                                style={{ paddingLeft: '2.75rem' }}
-                                required
-                            />
-                        </div>
+                        <PasswordInput
+                            name="currentPassword"
+                            value={formData.currentPassword}
+                            onChange={handleChange}
+                            placeholder="Enter current password"
+                            icon={Key}
+                            required
+                        />
                     </div>
 
                     <div className="form-group">
                         <label className="form-label">New Password (8-16 chars, 1 Uppercase, 1 Special Char)</label>
-                        <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                type="password"
-                                name="newPassword"
-                                value={formData.newPassword}
-                                onChange={handleChange}
-                                placeholder="Enter new password"
-                                className="form-control"
-                                style={{ paddingLeft: '2.75rem' }}
-                                required
-                            />
-                        </div>
+                        <PasswordInput
+                            name="newPassword"
+                            value={formData.newPassword}
+                            onChange={handleChange}
+                            placeholder="Enter new password"
+                            icon={Lock}
+                            required
+                        />
                     </div>
 
                     <div className="form-group">
                         <label className="form-label">Confirm New Password</label>
-                        <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                placeholder="Re-enter new password"
-                                className="form-control"
-                                style={{ paddingLeft: '2.75rem' }}
-                                required
-                            />
-                        </div>
+                        <PasswordInput
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            placeholder="Re-enter new password"
+                            icon={Lock}
+                            required
+                        />
                     </div>
 
                     <button

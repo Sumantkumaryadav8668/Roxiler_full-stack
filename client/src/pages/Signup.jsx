@@ -7,7 +7,8 @@ import {
     validatePassword,
     validateAddress
 } from '../utils/validation';
-import { User, Mail, Lock, MapPin, ArrowRight } from 'lucide-react';
+import PasswordInput from '../components/PasswordInput';
+import { User, Mail, MapPin, ArrowRight } from 'lucide-react';
 
 const Signup = () => {
     const { signup } = useAuth();
@@ -161,19 +162,13 @@ const Signup = () => {
                     
                     <div className="form-group">
                         <label className="form-label">Password (8-16 chars, 1 Uppercase, 1 Special Char)</label>
-                        <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="#94a3b8" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                type="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="e.g. Password@123"
-                                className="form-control"
-                                style={{ paddingLeft: '2.75rem' }}
-                                required
-                            />
-                        </div>
+                        <PasswordInput
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="e.g. Password@123"
+                            required
+                        />
                         {fieldErrors?.password && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{fieldErrors.password}</span>}
                     </div>
 

@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-const verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
     try {
         let token;
         const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -21,7 +21,7 @@ const verifyToken = (req, res, next) => {
             process.env.JWT_SECRET || 'roxiler_secret_jwt_key_2026_super_secure'
         );
 
-        req.user = decoded; 
+        req.user = decoded;
         next();
     } catch (err) {
         return res.status(401).json({
@@ -31,6 +31,6 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-module.exports = {
+export default {
     verifyToken
 };

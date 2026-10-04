@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const UserModel = require('../models/userModel');
-const { verifyToken } = require('../middleware/authMiddleware');
+import express from 'express';
+import UserModel from '../models/userModel.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
+const router = express.Router();
 
 router.get('/profile', verifyToken, async (req, res, next) => {
     try {
@@ -23,4 +23,4 @@ router.get('/profile', verifyToken, async (req, res, next) => {
     }
 });
 
-module.exports = router;
+export default router;

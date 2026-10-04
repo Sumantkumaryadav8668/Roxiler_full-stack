@@ -1,12 +1,9 @@
-const bcrypt = require('bcryptjs');
-const UserModel = require('../models/userModel');
-const generateToken = require('../utils/generateToken');
-const { validateSignup, validateLogin, validateChangePassword } = require('../validators/authValidator');
+import bcrypt from 'bcryptjs';
+import UserModel from '../models/userModel.js';
+import generateToken from '../utils/generateToken.js';
+import { validateSignup, validateLogin, validateChangePassword } from '../validators/authValidator.js';
 
-
-
-
-const signup = async (req, res, next) => {
+export const signup = async (req, res, next) => {
     try {
         const { isValid, errors } = validateSignup(req.body);
         if (!isValid) {
@@ -19,7 +16,6 @@ const signup = async (req, res, next) => {
 
         const { name, email, password, address } = req.body;
 
-        
         const existingUser = await UserModel.findByEmail(email.trim().toLowerCase());
         if (existingUser) {
             return res.status(409).json({
@@ -28,11 +24,9 @@ const signup = async (req, res, next) => {
             });
         }
 
-        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        
         const userId = await UserModel.create({
             name: name.trim(),
             email: email.trim().toLowerCase(),
@@ -62,10 +56,7 @@ const signup = async (req, res, next) => {
     }
 };
 
-
-
-
-const login = async (req, res, next) => {
+export const login = async (req, res, next) => {
     try {
         const { isValid, errors } = validateLogin(req.body);
         if (!isValid) {
@@ -78,7 +69,6 @@ const login = async (req, res, next) => {
 
         const { email, password } = req.body;
 
-        
         const user = await UserModel.findByEmail(email.trim().toLowerCase());
         if (!user) {
             return res.status(401).json({
@@ -87,7 +77,6 @@ const login = async (req, res, next) => {
             });
         }
 
-        
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({
@@ -117,20 +106,14 @@ const login = async (req, res, next) => {
     }
 };
 
-
-
-
-const logout = async (req, res) => {
+export const logout = async (req, res) => {
     return res.status(200).json({
         success: true,
         message: 'Logout successful.'
     });
 };
 
-
-
-
-const changePassword = async (req, res, next) => {
+export const changePassword = async (req, res, next) => {
     try {
         const { isValid, errors } = validateChangePassword(req.body);
         if (!isValid) {
@@ -144,7 +127,6 @@ const changePassword = async (req, res, next) => {
         const { currentPassword, newPassword } = req.body;
         const userId = req.user.id;
 
-        
         const user = await UserModel.findByIdWithPassword(userId);
         if (!user) {
             return res.status(404).json({
@@ -153,7 +135,6 @@ const changePassword = async (req, res, next) => {
             });
         }
 
-        
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({
@@ -162,7 +143,6 @@ const changePassword = async (req, res, next) => {
             });
         }
 
-        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
@@ -177,7 +157,7 @@ const changePassword = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export default {
     signup,
     login,
     logout,

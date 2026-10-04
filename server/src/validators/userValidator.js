@@ -1,6 +1,6 @@
-const { isValidEmail, isValidPassword, isValidName, isValidAddress } = require('./authValidator');
+import { isValidEmail, isValidPassword, isValidName, isValidAddress } from './authValidator.js';
 
-const validateAddUser = (data) => {
+export const validateAddUser = (data) => {
     const errors = [];
     const { name, email, password, address, role } = data;
 
@@ -31,6 +31,6 @@ const validateAddUser = (data) => {
     };
 };
 
-module.exports = {
+export default {
     validateAddUser
 };

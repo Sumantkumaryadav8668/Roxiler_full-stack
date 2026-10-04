@@ -1,6 +1,6 @@
-const { isValidEmail, isValidName, isValidAddress } = require('./authValidator');
+import { isValidEmail, isValidAddress } from './authValidator.js';
 
-const validateAddStore = (data) => {
+export const validateAddStore = (data) => {
     const errors = [];
     const { name, email, address, owner_id } = data;
 
@@ -29,7 +29,7 @@ const validateAddStore = (data) => {
     };
 };
 
-const validateRating = (rating) => {
+export const validateRating = (rating) => {
     const numRating = Number(rating);
     if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
         return {
@@ -40,7 +40,7 @@ const validateRating = (rating) => {
     return { isValid: true };
 };
 
-module.exports = {
+export default {
     validateAddStore,
     validateRating
 };

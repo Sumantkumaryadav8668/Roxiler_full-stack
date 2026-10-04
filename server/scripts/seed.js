@@ -1,27 +1,37 @@
-const mysql = require('mysql2/promise');
-const bcrypt = require('bcryptjs');
-const dotenv = require('dotenv');
+import mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
 
 dotenv.config();
+
+const getEnv = (key, fallback = '') => {
+    const val = process.env[key];
+    return val ? val.trim() : fallback;
+};
 
 const seedDatabase = async () => {
     let connection;
     try {
-        console.log('🌱 Starting Database Seeding Process...');
+        console.log('🌱 Starting Non-Destructive Database Seeding Check...');
 
-        
+        const host = getEnv('DB_HOST') || getEnv('MYSQLHOST') || 'localhost';
+        const port = parseInt(getEnv('DB_PORT') || getEnv('MYSQLPORT') || '3306', 10);
+        const user = getEnv('DB_USER') || getEnv('MYSQLUSER') || 'root';
+        const password = getEnv('DB_PASSWORD') || getEnv('MYSQLPASSWORD') || '';
+        const database = getEnv('DB_NAME') || getEnv('MYSQLDATABASE') || 'roxiler_db';
+        const isRemoteHost = host !== 'localhost' && host !== '127.0.0.1';
+        const useSSL = getEnv('DB_SSL') === 'true' || isRemoteHost;
+
         connection = await mysql.createConnection({
-            host: process.env.DB_HOST || 'localhost',
-            port: process.env.DB_PORT || 3306,
-            user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASSWORD || ''
+            host,
+            port,
+            user,
+            password,
+            database,
+            ssl: useSSL ? { rejectUnauthorized: false } : undefined
         });
 
-        const dbName = process.env.DB_NAME || 'roxiler_db';
-        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
-        await connection.query(`USE \`${dbName}\``);
-
-        
+        // Ensure tables exist safely without dropping or truncating
         await connection.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -66,83 +76,68 @@ const seedDatabase = async () => {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
-        
-        await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-        await connection.query('TRUNCATE TABLE ratings');
-        await connection.query('TRUNCATE TABLE stores');
-        await connection.query('TRUNCATE TABLE users');
-        await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+        console.log('✅ Tables verified safely without deleting any data.');
 
-        console.log('🧹 Cleaned existing database tables.');
+        // Helper: Ensure User exists without deleting existing users
+        const ensureUser = async (name, email, passwordStr, address, role) => {
+            const [existing] = await connection.query('SELECT id FROM users WHERE email = ?', [email]);
+            if (existing.length > 0) {
+                console.log(`ℹ️ User '${email}' already exists (ID: ${existing[0].id}). Preserved.`);
+                return existing[0].id;
+            }
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(passwordStr, salt);
+            const [result] = await connection.query(
+                `INSERT INTO users (name, email, password, address, role) VALUES (?, ?, ?, ?, ?)`,
+                [name, email, hashedPassword, address, role]
+            );
+            console.log(`➕ Inserted missing seed user '${email}' (ID: ${result.insertId}).`);
+            return result.insertId;
+        };
 
-        
         const defaultPassword = 'Password@123';
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(defaultPassword, salt);
+        const adminId = await ensureUser('System Administrator Roxiler', 'admin@roxiler.com', defaultPassword, '100 Tech Corporate Boulevard, Suite 500, New York, NY', 'ADMIN');
+        const ownerId = await ensureUser('Store Owner Master Account', 'owner@roxiler.com', defaultPassword, '456 Business Park Center, Building B, San Francisco, CA', 'STORE_OWNER');
+        const user1Id = await ensureUser('Johnathan Alexander Developer', 'user1@roxiler.com', defaultPassword, '789 Residential Avenue, Apartment 12B, Austin, TX', 'USER');
+        const user2Id = await ensureUser('Samantha Victoria Professional', 'user2@roxiler.com', defaultPassword, '321 Commercial Boulevard, Floor 3, Chicago, IL', 'USER');
 
-        
-        const [adminResult] = await connection.query(`
-            INSERT INTO users (name, email, password, address, role)
-            VALUES ('System Administrator Roxiler', 'admin@roxiler.com', ?, '100 Tech Corporate Boulevard, Suite 500, New York, NY', 'ADMIN')
-        `, [hashedPassword]);
+        // Helper: Ensure Store exists without deleting existing stores
+        const ensureStore = async (name, email, address, assignedOwnerId) => {
+            const [existing] = await connection.query('SELECT id FROM stores WHERE name = ?', [name]);
+            if (existing.length > 0) {
+                console.log(`ℹ️ Store '${name}' already exists (ID: ${existing[0].id}). Preserved.`);
+                return existing[0].id;
+            }
+            const [result] = await connection.query(
+                `INSERT INTO stores (name, email, address, owner_id) VALUES (?, ?, ?, ?)`,
+                [name, email, address, assignedOwnerId]
+            );
+            console.log(`➕ Inserted missing seed store '${name}' (ID: ${result.insertId}).`);
+            return result.insertId;
+        };
 
-        const [ownerResult] = await connection.query(`
-            INSERT INTO users (name, email, password, address, role)
-            VALUES ('Store Owner Master Account', 'owner@roxiler.com', ?, '456 Business Park Center, Building B, San Francisco, CA', 'STORE_OWNER')
-        `, [hashedPassword]);
+        const store1Id = await ensureStore('SuperTech Electronics Store Outlet', 'contact@supertech.com', '101 Silicon Highway, Tech City, CA 94016', ownerId);
+        const store2Id = await ensureStore('Grand Gourmet Food & Grocery Market', 'info@grandgourmet.com', '202 Flavor Street, Culinary District, NY 10012', null);
 
-        const [user1Result] = await connection.query(`
-            INSERT INTO users (name, email, password, address, role)
-            VALUES ('Johnathan Alexander Developer', 'user1@roxiler.com', ?, '789 Residential Avenue, Apartment 12B, Austin, TX', 'USER')
-        `, [hashedPassword]);
+        // Helper: Ensure Rating exists without deleting existing ratings
+        const ensureRating = async (userId, storeId, ratingValue) => {
+            const [existing] = await connection.query('SELECT id FROM ratings WHERE user_id = ? AND store_id = ?', [userId, storeId]);
+            if (existing.length > 0) {
+                return;
+            }
+            await connection.query(
+                `INSERT INTO ratings (user_id, store_id, rating) VALUES (?, ?, ?)`,
+                [userId, storeId, ratingValue]
+            );
+        };
 
-        const [user2Result] = await connection.query(`
-            INSERT INTO users (name, email, password, address, role)
-            VALUES ('Samantha Victoria Professional', 'user2@roxiler.com', ?, '321 Commercial Boulevard, Floor 3, Chicago, IL', 'USER')
-        `, [hashedPassword]);
+        await ensureRating(user1Id, store1Id, 5);
+        await ensureRating(user2Id, store1Id, 4);
+        await ensureRating(user1Id, store2Id, 3);
 
-        console.log('👥 Seeded Users (1 Admin, 1 Owner, 2 Normal Users).');
-
-        
-        const [store1Result] = await connection.query(`
-            INSERT INTO stores (name, email, address, owner_id)
-            VALUES ('SuperTech Electronics Store Outlet', 'contact@supertech.com', '101 Silicon Highway, Tech City, CA 94016', ?)
-        `, [ownerResult.insertId]);
-
-        const [store2Result] = await connection.query(`
-            INSERT INTO stores (name, email, address, owner_id)
-            VALUES ('Grand Gourmet Food & Grocery Market', 'info@grandgourmet.com', '202 Flavor Street, Culinary District, NY 10012', NULL)
-        `, []);
-
-        console.log('🏪 Seeded Stores (2 Stores).');
-
-        
-        await connection.query(`
-            INSERT INTO ratings (user_id, store_id, rating)
-            VALUES 
-                (?, ?, 5),
-                (?, ?, 4),
-                (?, ?, 3)
-        `, [
-            user1Result.insertId, store1Result.insertId,
-            user2Result.insertId, store1Result.insertId,
-            user1Result.insertId, store2Result.insertId
-        ]);
-
-        console.log('⭐ Seeded Ratings.');
-        console.log('✅ Database Seeding Completed Successfully!');
-        console.log(`
-        -----------------------------------------------------
-        TEST LOGIN CREDENTIALS (All passwords: Password@123):
-        -----------------------------------------------------
-        Admin:       admin@roxiler.com
-        Store Owner: owner@roxiler.com
-        User 1:      user1@roxiler.com
-        User 2:      user2@roxiler.com
-        -----------------------------------------------------
-        `);
+        console.log('✅ Non-Destructive Database Seeding Check Completed Successfully!');
     } catch (err) {
-        console.error('❌ Seeding failed:', err.message);
+        console.error('❌ Seeding check failed:', err.message);
     } finally {
         if (connection) await connection.end();
     }

@@ -1,8 +1,8 @@
-const { test, describe, before, after } = require('node:test');
-const assert = require('node:assert');
-const http = require('node:http');
-const app = require('../server');
-const { pool, testConnection } = require('../config/db');
+import { test, describe, before, after } from 'node:test';
+import assert from 'node:assert';
+import http from 'node:http';
+import app from '../src/app.js';
+import { pool, testConnection } from '../src/config/db.js';
 
 let server;
 let baseUrl;
@@ -15,7 +15,7 @@ let createdUserId = null;
 let createdStoreId = null;
 let createdRatingId = null;
 
-const request = (method, path, body = null, headers = ) => {
+const request = (method, path, body = null, headers = {}) => {
     return new Promise((resolve, reject) => {
         const url = new URL(path, baseUrl);
         const reqHeaders = {
@@ -33,7 +33,7 @@ const request = (method, path, body = null, headers = ) => {
             res.on('data', (chunk) => { data += chunk; });
             res.on('end', () => {
                 try {
-                    const parsed = data ? JSON.parse(data) : ;
+                    const parsed = data ? JSON.parse(data) : {};
                     resolve({ status: res.statusCode, headers: res.headers, body: parsed });
                 } catch (err) {
                     resolve({ status: res.statusCode, headers: res.headers, body: data });

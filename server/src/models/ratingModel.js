@@ -1,7 +1,6 @@
-const { pool } = require('../config/db');
+import { pool } from '../config/db.js';
 
 class RatingModel {
-    
     static async upsert({ user_id, store_id, rating }) {
         const sql = `
             INSERT INTO ratings (user_id, store_id, rating)
@@ -14,34 +13,29 @@ class RatingModel {
         return result;
     }
 
-    
     static async findById(id) {
         const sql = `SELECT * FROM ratings WHERE id = ?`;
         const [rows] = await pool.execute(sql, [id]);
         return rows[0] || null;
     }
 
-    
     static async findByUserAndStore(userId, storeId) {
         const sql = `SELECT * FROM ratings WHERE user_id = ? AND store_id = ?`;
         const [rows] = await pool.execute(sql, [userId, storeId]);
         return rows[0] || null;
     }
 
-    
     static async update(id, rating) {
         const sql = `UPDATE ratings SET rating = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
         const [result] = await pool.execute(sql, [rating, id]);
         return result.affectedRows > 0;
     }
 
-    
     static async count() {
         const [rows] = await pool.execute(`SELECT COUNT(*) as total FROM ratings`);
         return rows[0].total;
     }
 
-    
     static async getStoreRatings(storeId) {
         const sql = `
             SELECT r.id, r.user_id, r.store_id, r.rating, r.created_at, r.updated_at,
@@ -55,7 +49,6 @@ class RatingModel {
         return rows;
     }
 
-    
     static async getStoreOwnerRatings(ownerId) {
         const sql = `
             SELECT r.id, r.rating, r.created_at, r.updated_at,
@@ -72,4 +65,4 @@ class RatingModel {
     }
 }
 
-module.exports = RatingModel;
+export default RatingModel;

@@ -1,10 +1,7 @@
-const StoreModel = require('../models/storeModel');
-const RatingModel = require('../models/ratingModel');
+import StoreModel from '../models/storeModel.js';
+import RatingModel from '../models/ratingModel.js';
 
-
-
-
-const getStores = async (req, res, next) => {
+export const getStores = async (req, res, next) => {
     try {
         const { search, name, address, sortBy, sortOrder } = req.query;
         const querySearch = search || name || address || '';
@@ -27,10 +24,7 @@ const getStores = async (req, res, next) => {
     }
 };
 
-
-
-
-const getStoreById = async (req, res, next) => {
+export const getStoreById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const store = await StoreModel.findById(id);
@@ -52,10 +46,7 @@ const getStoreById = async (req, res, next) => {
     }
 };
 
-
-
-
-const getOwnerDashboard = async (req, res, next) => {
+export const getOwnerDashboard = async (req, res, next) => {
     try {
         const ownerId = req.user.id;
         const store = await StoreModel.findByOwnerId(ownerId);
@@ -84,7 +75,7 @@ const getOwnerDashboard = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export default {
     getStores,
     getStoreById,
     getOwnerDashboard

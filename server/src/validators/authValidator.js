@@ -1,14 +1,9 @@
-
-const isValidEmail = (email) => {
+export const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return typeof email === 'string' && emailRegex.test(email.trim());
 };
 
-
-
-
-
-const isValidPassword = (password) => {
+export const isValidPassword = (password) => {
     if (typeof password !== 'string') return false;
     if (password.length < 8 || password.length > 16) return false;
     const hasUppercase = /[A-Z]/.test(password);
@@ -16,19 +11,19 @@ const isValidPassword = (password) => {
     return hasUppercase && hasSpecialChar;
 };
 
-const isValidName = (name) => {
+export const isValidName = (name) => {
     if (typeof name !== 'string') return false;
     const trimmed = name.trim();
     return trimmed.length >= 20 && trimmed.length <= 60;
 };
 
-const isValidAddress = (address) => {
+export const isValidAddress = (address) => {
     if (typeof address !== 'string') return false;
     const trimmed = address.trim();
     return trimmed.length > 0 && trimmed.length <= 400;
 };
 
-const validateSignup = (data) => {
+export const validateSignup = (data) => {
     const errors = [];
     const { name, email, password, address } = data;
 
@@ -54,7 +49,7 @@ const validateSignup = (data) => {
     };
 };
 
-const validateLogin = (data) => {
+export const validateLogin = (data) => {
     const errors = [];
     const { email, password } = data;
 
@@ -72,7 +67,7 @@ const validateLogin = (data) => {
     };
 };
 
-const validateChangePassword = (data) => {
+export const validateChangePassword = (data) => {
     const errors = [];
     const { currentPassword, newPassword } = data;
 
@@ -94,7 +89,7 @@ const validateChangePassword = (data) => {
     };
 };
 
-module.exports = {
+export default {
     isValidEmail,
     isValidPassword,
     isValidName,

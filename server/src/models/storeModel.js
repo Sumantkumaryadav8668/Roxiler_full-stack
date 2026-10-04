@@ -1,7 +1,6 @@
-const { pool } = require('../config/db');
+import { pool } from '../config/db.js';
 
 class StoreModel {
-    
     static async create({ name, email, address, owner_id = null }) {
         const sql = `
             INSERT INTO stores (name, email, address, owner_id)
@@ -11,7 +10,6 @@ class StoreModel {
         return result.insertId;
     }
 
-    
     static async findById(id) {
         const sql = `
             SELECT s.id, s.name, s.email, s.address, s.owner_id, s.created_at,
@@ -22,13 +20,12 @@ class StoreModel {
             LEFT JOIN users u ON s.owner_id = u.id
             LEFT JOIN ratings r ON s.id = r.store_id
             WHERE s.id = ?
-            GROUP BY s.id
+            GROUP BY s.id, u.id
         `;
         const [rows] = await pool.execute(sql, [id]);
         return rows[0] || null;
     }
 
-    
     static async findByOwnerId(ownerId) {
         const sql = `
             SELECT s.id, s.name, s.email, s.address, s.owner_id, s.created_at,
@@ -43,13 +40,11 @@ class StoreModel {
         return rows[0] || null;
     }
 
-    
     static async count() {
         const [rows] = await pool.execute(`SELECT COUNT(*) as total FROM stores`);
         return rows[0].total;
     }
 
-    
     static async getAll({ search = '', userId = null, sortBy = 'name', sortOrder = 'ASC' }) {
         let sql = `
             SELECT s.id, s.name, s.email, s.address, s.owner_id, s.created_at,
@@ -72,7 +67,6 @@ class StoreModel {
 
         sql += ` GROUP BY s.id, ur.id, ur.rating`;
 
-        
         const allowedSortFields = {
             id: 's.id',
             name: 's.name',
@@ -93,4 +87,4 @@ class StoreModel {
     }
 }
 
-module.exports = StoreModel;
+export default StoreModel;

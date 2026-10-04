@@ -1,11 +1,8 @@
-const RatingModel = require('../models/ratingModel');
-const StoreModel = require('../models/storeModel');
-const { validateRating } = require('../validators/storeValidator');
+import RatingModel from '../models/ratingModel.js';
+import StoreModel from '../models/storeModel.js';
+import { validateRating } from '../validators/storeValidator.js';
 
-
-
-
-const submitRating = async (req, res, next) => {
+export const submitRating = async (req, res, next) => {
     try {
         const { store_id, rating } = req.body;
         const userId = req.user.id;
@@ -25,7 +22,6 @@ const submitRating = async (req, res, next) => {
             });
         }
 
-        
         const store = await StoreModel.findById(store_id);
         if (!store) {
             return res.status(404).json({
@@ -34,14 +30,12 @@ const submitRating = async (req, res, next) => {
             });
         }
 
-        
         await RatingModel.upsert({
             user_id: userId,
             store_id: Number(store_id),
             rating: Number(rating)
         });
 
-        
         const updatedStore = await StoreModel.findById(store_id);
 
         return res.status(201).json({
@@ -58,10 +52,7 @@ const submitRating = async (req, res, next) => {
     }
 };
 
-
-
-
-const updateRating = async (req, res, next) => {
+export const updateRating = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { rating } = req.body;
@@ -83,7 +74,6 @@ const updateRating = async (req, res, next) => {
             });
         }
 
-        
         if (existingRating.user_id !== userId && req.user.role !== 'ADMIN') {
             return res.status(403).json({
                 success: false,
@@ -93,7 +83,6 @@ const updateRating = async (req, res, next) => {
 
         await RatingModel.update(id, Number(rating));
 
-        
         const updatedStore = await StoreModel.findById(existingRating.store_id);
 
         return res.status(200).json({
@@ -111,10 +100,7 @@ const updateRating = async (req, res, next) => {
     }
 };
 
-
-
-
-const getStoreRatings = async (req, res, next) => {
+export const getStoreRatings = async (req, res, next) => {
     try {
         const { storeId } = req.params;
         const ratings = await RatingModel.getStoreRatings(storeId);
@@ -129,7 +115,7 @@ const getStoreRatings = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export default {
     submitRating,
     updateRating,
     getStoreRatings

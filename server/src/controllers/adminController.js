@@ -1,14 +1,11 @@
-const bcrypt = require('bcryptjs');
-const UserModel = require('../models/userModel');
-const StoreModel = require('../models/storeModel');
-const RatingModel = require('../models/ratingModel');
-const { validateAddUser } = require('../validators/userValidator');
-const { validateAddStore } = require('../validators/storeValidator');
+import bcrypt from 'bcryptjs';
+import UserModel from '../models/userModel.js';
+import StoreModel from '../models/storeModel.js';
+import RatingModel from '../models/ratingModel.js';
+import { validateAddUser } from '../validators/userValidator.js';
+import { validateAddStore } from '../validators/storeValidator.js';
 
-
-
-
-const getDashboardStats = async (req, res, next) => {
+export const getDashboardStats = async (req, res, next) => {
     try {
         const totalUsers = await UserModel.count();
         const totalStores = await StoreModel.count();
@@ -28,10 +25,7 @@ const getDashboardStats = async (req, res, next) => {
     }
 };
 
-
-
-
-const addUser = async (req, res, next) => {
+export const addUser = async (req, res, next) => {
     try {
         const { isValid, errors } = validateAddUser(req.body);
         if (!isValid) {
@@ -44,7 +38,6 @@ const addUser = async (req, res, next) => {
 
         const { name, email, password, address, role } = req.body;
 
-        
         const existingUser = await UserModel.findByEmail(email.trim().toLowerCase());
         if (existingUser) {
             return res.status(409).json({
@@ -53,7 +46,6 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -81,10 +73,7 @@ const addUser = async (req, res, next) => {
     }
 };
 
-
-
-
-const addStore = async (req, res, next) => {
+export const addStore = async (req, res, next) => {
     try {
         const { isValid, errors } = validateAddStore(req.body);
         if (!isValid) {
@@ -97,7 +86,6 @@ const addStore = async (req, res, next) => {
 
         const { name, email, address, owner_id } = req.body;
 
-        
         if (owner_id) {
             const owner = await UserModel.findById(owner_id);
             if (!owner) {
@@ -137,14 +125,10 @@ const addStore = async (req, res, next) => {
     }
 };
 
-
-
-
-const getUsers = async (req, res, next) => {
+export const getUsers = async (req, res, next) => {
     try {
         const { name, email, address, search, role, sortBy, sortOrder } = req.query;
 
-        
         const querySearch = search || name || email || address || '';
 
         const users = await UserModel.getAll({
@@ -164,10 +148,7 @@ const getUsers = async (req, res, next) => {
     }
 };
 
-
-
-
-const getStores = async (req, res, next) => {
+export const getStores = async (req, res, next) => {
     try {
         const { name, address, search, sortBy, sortOrder } = req.query;
         const querySearch = search || name || address || '';
@@ -188,10 +169,7 @@ const getStores = async (req, res, next) => {
     }
 };
 
-
-
-
-const getUserById = async (req, res, next) => {
+export const getUserById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const user = await UserModel.findById(id);
@@ -221,7 +199,7 @@ const getUserById = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export default {
     getDashboardStats,
     addUser,
     addStore,
